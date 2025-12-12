@@ -1,69 +1,36 @@
-
 <!DOCTYPE html>
 <html>
 <head>
-<title>Multi Stream Manager</title>
-<style>
-body { font-family: Arial; padding:20px; max-width:600px; margin:auto; }
-input, textarea { width:100%; padding:10px; margin:8px 0; }
-button { padding:10px 20px; margin:5px 5px; }
-#list { background:#eee; padding:10px; }
-</style>
+  <title>Multi Stream Manager</title>
 </head>
 <body>
+  <h2>Multi Stream Manager</h2>
 
-<h2>Multi Stream Manager</h2>
+  <p>Video URL:</p>
+  <input id="input" placeholder="https://example.com/video.mp4" style="width:100%">
 
-<h3>Start New Stream</h3>
-<label>Video URL:</label>
-<input id="inputUrl" placeholder="https://example.com/video.mp4">
+  <p>YouTube RTMP:</p>
+  <input id="output" placeholder="rtmp://a.rtmp.youtube.com/live2/XXXX" style="width:100%">
 
-<label>Upload File:</label>
-<input id="fileInput" type="file">
+  <br><br>
+  <button onclick="start()">Start Stream</button>
 
-<label>YouTube RTMP Output:</label>
-<input id="output" placeholder="rtmp://a.rtmp.youtube.com/live2/key">
-
-<button onclick="startUrl()">Start via URL</button>
-<button onclick="startFile()">Start via File</button>
-
-<h3>Active Streams</h3>
-<pre id="list"></pre>
+  <pre id="log"></pre>
 
 <script>
-async function refresh(){
-  const r = await fetch("/list");
-  document.getElementById("list").textContent = JSON.stringify(await r.json(), null, 2);
-}
-
-async function startUrl(){
-  const input = document.getElementById("inputUrl").value;
+async function start(){
+  const input = document.getElementById("input").value;
   const output = document.getElementById("output").value;
 
-  const r = await fetch("/start", {
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({ input, output })
+  const res = await fetch("/start", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ input, output })
   });
 
-  alert(JSON.stringify(await r.json()));
-  refresh();
+  document.getElementById("log").textContent =
+    JSON.stringify(await res.json(), null, 2);
 }
-
-async function startFile(){
-  const file = document.getElementById("fileInput").files[0];
-  const output = document.getElementById("output").value;
-  const fd = new FormData();
-  fd.append("file", file);
-  fd.append("output", output);
-
-  const r = await fetch("/start", { method:"POST", body:fd });
-  alert(JSON.stringify(await r.json()));
-  refresh();
-}
-
-refresh();
 </script>
-
 </body>
 </html>
